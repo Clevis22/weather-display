@@ -32,7 +32,7 @@
   <!-- HEADER -->
   <header class="bg-[#384936] text-[#b49a5b] p-4 flex justify-between items-center shadow-md z-10 shrink-0">
     <div>
-      <h1 class="text-2xl tracking-[0.2em] font-bold mb-1">EMMITSBURG WEATHER</h1>
+      <h1 class="text-2xl tracking-[0.2em] font-bold mb-1">EMMITSBURG FIELD STATION</h1>
       <p class="text-sm tracking-widest opacity-90">
         Emmitsburg MD · 39.70°N 77.33°W · Elev 476ft
       </p>
@@ -237,6 +237,7 @@
     const cToF = (c) => Math.round((c * 9) / 5 + 32);
     const mToMi = (m) => (m * 0.000621371).toFixed(1);
     const paToInHg = (pa) => (pa * 0.0002953).toFixed(2);
+    const knotsToMph = (knots) => Math.round(knots * 1.15078);
     const getWindDirection = (degree) => {
       if (degree === null || degree === undefined) return '';
       const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
@@ -244,7 +245,20 @@
       return directions[index % 16];
     };
 
-    let currentStationId = 'LWX';
+    function getConditionText(skyc) {
+      if (!skyc) return 'OBSERVED CONDITIONS';
+      const map = {
+        'CLR': 'CLEAR',
+        'FEW': 'FEW CLOUDS',
+        'SCT': 'SCATTERED CLOUDS',
+        'BKN': 'BROKEN CLOUDS',
+        'OVC': 'OVERCAST',
+        'VV ': 'OBSCURED'
+      };
+      return map[skyc] || skyc;
+    }
+
+    let currentStationId = 'KFDK'; // Defaulting to Frederick ASOS via IEM
 
     // UI Updates
     function updateClock() {
@@ -287,75 +301,65 @@
         const loadingOverlay = document.getElementById('loading-overlay');
         const contentContainer = document.getElementById('content-container');
         
-        // Refresh images dynamically with cache-busting timestamp
-        const cacheBuster = new Date().getTime();
-        const radarUrl = `https://radar.weather.gov/ridge/lite/KLWX_loop.gif?v=${cacheBuster}`;
-        const spcUrl = `https://www.spc.noaa.gov/products/outlook/day1otlk.gif?v=${cacheBuster}`;
+        // Setup Images with Fallback Handlers
+        const radarImgCurrent = document.getElementById('current-radar-img');
+        const radarImgTab = document.getElementById('tab-radar-img');
+        const spcImg = document.getElementById('spc-outlook-img');
+
+        // If NOAA ridge fails, fallback to IEM national radar loop
+        const fallbackRadarUrl = `https://mesonet.agron.iastate.edu/data/radar/uscomp.gif`;
+        radarImgCurrent.onerror = () => { radarImgCurrent.src = fallbackRadarUrl; };
+        radarImgTab.onerror = () => { radarImgTab.src = fallbackRadarUrl; };
         
-        document.getElementById('current-radar-img').src = radarUrl;
-        document.getElementById('tab-radar-img').src = radarUrl;
-        document.getElementById('spc-outlook-img').src = spcUrl;
+        radarImgCurrent.src = `https://radar.weather.gov/ridge/lite/KLWX_loop.gif`;
+        radarImgTab.src = `https://radar.weather.gov/ridge/lite/KLWX_loop.gif`;
+        spcImg.src = `https://www.spc.noaa.gov/products/outlook/day1otlk.gif`;
 
         // Emmitsburg MD coordinates
         const lat = 39.7037;
         const lon = -77.3269;
 
-        // 1. Get Gridpoint
-        const pointRes = await fetch(`https://api.weather.gov/points/${lat},${lon}`);
+        // Fetch Telemetry from Iowa State Mesonet (IEM) - KFDK (Frederick MD)
+        // IEM is significantly more stable than the NWS observations endpoint
+        const iemRes = await fetch(`https://mesonet.agron.iastate.edu/api/1/currents.json?station=FDK`);
+        const iemData = await iemRes.json();
+        const obs = iemData.data[0]; 
+
+        // Fetch Forecast/Alerts from NWS 
+        // NWS requires a User-Agent, otherwise it silently blocks requests (which causes the empty data issue)
+        const nwsHeaders = {
+          'User-Agent': '(EmmitsburgFieldStationApp, null@example.com)',
+          'Accept': 'application/geo+json'
+        };
+
+        const pointRes = await fetch(`https://api.weather.gov/points/${lat},${lon}`, { headers: nwsHeaders });
         const pointData = await pointRes.json();
         
-        // 2. Fetch Forecast & Alerts in parallel
         const [forecastRes, alertsRes] = await Promise.all([
-          fetch(pointData.properties.forecast),
-          fetch(`https://api.weather.gov/alerts/active?point=${lat},${lon}`)
+          fetch(pointData.properties.forecast, { headers: nwsHeaders }),
+          fetch(`https://api.weather.gov/alerts/active?point=${lat},${lon}`, { headers: nwsHeaders })
         ]);
         
         const forecastData = await forecastRes.json();
         const alertsData = await alertsRes.json();
-        const forecastPeriods = forecastData.properties.periods;
-        const alerts = alertsData.features;
+        const forecastPeriods = forecastData.properties?.periods || [];
+        const alerts = alertsData.features || [];
 
-        // 3. Fallback Station Fetching Loop
-        // Sometimes NWS stations go offline. We will query the nearest 3 stations.
-        const stationsRes = await fetch(pointData.properties.observationStations);
-        const stationsData = await stationsRes.json();
-        const stationList = stationsData.features;
+        // --- Render Data to DOM using IEM Data ---
+        document.getElementById('tel-station').textContent = obs.station || 'FDK';
+        document.getElementById('footer-station').textContent = `IEM ASOS: ${obs.station || 'FDK'}`;
         
-        let obs = null;
-        for (let i = 0; i < Math.min(stationList.length, 3); i++) {
-          currentStationId = stationList[i].properties.stationIdentifier;
-          try {
-            const obsRes = await fetch(`https://api.weather.gov/stations/${currentStationId}/observations/latest`);
-            if (obsRes.ok) {
-              const obsDataRes = await obsRes.json();
-              obs = obsDataRes.properties;
-              break; // Success! Break out of the loop.
-            }
-          } catch (e) {
-            console.warn(`Station ${currentStationId} observation fetch failed, trying next...`);
-          }
-        }
-
-        // --- Render Data to DOM ---
-        document.getElementById('tel-station').textContent = currentStationId || 'NO DATA';
-        document.getElementById('footer-station').textContent = currentStationId || 'NO DATA';
-        
-        document.getElementById('tel-humidity').textContent = obs?.relativeHumidity?.value ? Math.round(obs.relativeHumidity.value) + '%' : '--';
-        document.getElementById('tel-wind').textContent = obs?.windSpeed?.value !== null && obs?.windSpeed?.value !== undefined 
-          ? `${getWindDirection(obs.windDirection.value)} ${Math.round(obs.windSpeed.value * 0.621371)}` 
+        document.getElementById('tel-humidity').textContent = obs.relh !== null ? Math.round(obs.relh) + '%' : '--';
+        document.getElementById('tel-wind').textContent = obs.sknt !== null 
+          ? `${getWindDirection(obs.drct)} ${knotsToMph(obs.sknt)}` 
           : '--';
-        document.getElementById('tel-pressure').textContent = obs?.barometricPressure?.value ? paToInHg(obs.barometricPressure.value) : '--';
-        document.getElementById('tel-visibility').textContent = obs?.visibility?.value ? mToMi(obs.visibility.value) : '--';
-        document.getElementById('tel-dewpoint').textContent = obs?.dewpoint?.value !== null && obs?.dewpoint?.value !== undefined 
-          ? cToF(obs.dewpoint.value) : '--';
+        document.getElementById('tel-pressure').textContent = obs.alti !== null ? obs.alti.toFixed(2) : '--';
+        document.getElementById('tel-visibility').textContent = obs.vsby !== null ? obs.vsby.toFixed(1) : '--';
+        document.getElementById('tel-dewpoint').textContent = obs.dwpf !== null ? Math.round(obs.dwpf) : '--';
 
-        let ceiling = '--';
-        if (obs?.cloudLayers && obs.cloudLayers.length > 0) {
-          const lowestCloud = obs.cloudLayers[0];
-          ceiling = lowestCloud.base?.value ? Math.round(lowestCloud.base.value * 3.28084) + 'ft' : lowestCloud.amount || '--';
-        } else if (obs && !obs.cloudLayers) {
-          ceiling = 'CLR';
-        }
+        let ceiling = 'CLR';
+        if (obs.skyl1 !== null) ceiling = `${obs.skyl1}ft`;
+        else if (obs.skyc1 !== null) ceiling = obs.skyc1;
         document.getElementById('tel-ceiling').textContent = ceiling;
 
         // Alerts Box
@@ -376,27 +380,24 @@
         }
 
         // Current Tab Observation Info
-        document.getElementById('current-temp').textContent = obs?.temperature?.value !== null ? cToF(obs.temperature.value) : '--';
-        document.getElementById('current-desc').textContent = obs?.textDescription || 'Unknown Conditions';
+        document.getElementById('current-temp').textContent = obs.tmpf !== null ? Math.round(obs.tmpf) : '--';
+        document.getElementById('current-desc').textContent = getConditionText(obs.skyc1);
+        document.getElementById('current-feels').textContent = obs.feel !== null ? Math.round(obs.feel) : '--';
         
-        let feelsLike = '--';
-        if (obs?.heatIndex?.value !== null && obs?.heatIndex?.value !== undefined) {
-          feelsLike = cToF(obs.heatIndex.value);
-        } else if (obs?.windChill?.value !== null && obs?.windChill?.value !== undefined) {
-          feelsLike = cToF(obs.windChill.value);
-        }
-        document.getElementById('current-feels').textContent = feelsLike;
-        
-        const timestamp = obs?.timestamp ? new Date(obs.timestamp) : new Date();
+        // Parse IEM timestamp (local_valid)
+        const timestamp = obs.local_valid ? new Date(obs.local_valid) : new Date();
         document.getElementById('current-ping').textContent = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
+        // Dispatch / Forecast
         if (forecastPeriods && forecastPeriods.length > 0) {
           document.getElementById('current-dispatch').textContent = forecastPeriods[0].detailedForecast;
+        } else {
+          document.getElementById('current-dispatch').textContent = "Awaiting NWS dispatch data...";
         }
 
         // 7-Day Forecast Tab
         const forecastContainer = document.getElementById('forecast-container');
-        if (forecastPeriods) {
+        if (forecastPeriods && forecastPeriods.length > 0) {
           let forecastHtml = '';
           forecastPeriods.forEach(period => {
             forecastHtml += `
@@ -424,7 +425,7 @@
         setTimeout(() => {
           loadingOverlay.classList.add('hidden');
           contentContainer.classList.remove('hidden');
-        }, 800);
+        }, 500);
 
       } catch (error) {
         console.error("Weather fetch failed:", error);
