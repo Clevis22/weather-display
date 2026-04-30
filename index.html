@@ -14,29 +14,25 @@
       animation: fadeIn 0.4s ease-out forwards;
     }
     
-    /* Ensure scrollbars match aesthetic */
+    /* Ensure scrollbars match aesthetic (kept for the alerts box just in case) */
     ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
+      width: 4px;
+      height: 4px;
     }
     ::-webkit-scrollbar-track {
-      background: #c2beae; 
-      border-left: 1px solid #a09c8c;
+      background: transparent; 
     }
     ::-webkit-scrollbar-thumb {
       background: #a09c8c; 
     }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #8b7d6b; 
-    }
   </style>
 </head>
-<body class="bg-[#bab7aa] font-mono text-[#3b2d23] selection:bg-[#384936] selection:text-[#b49a5b] min-h-screen flex flex-col">
+<body class="bg-[#bab7aa] font-mono text-[#3b2d23] selection:bg-[#384936] selection:text-[#b49a5b] h-screen overflow-hidden flex flex-col">
 
   <!-- HEADER -->
-  <header class="bg-[#384936] text-[#b49a5b] p-4 flex justify-between items-center shadow-md z-10 relative">
+  <header class="bg-[#384936] text-[#b49a5b] p-4 flex justify-between items-center shadow-md z-10 shrink-0">
     <div>
-      <h1 class="text-2xl tracking-[0.2em] font-bold mb-1">EMMITSBURG FIELD STATION</h1>
+      <h1 class="text-2xl tracking-[0.2em] font-bold mb-1">EMMITSBURG WEATHER</h1>
       <p class="text-sm tracking-widest opacity-90">
         Emmitsburg MD · 39.70°N 77.33°W · Elev 476ft
       </p>
@@ -52,35 +48,35 @@
   <div class="flex flex-1 flex-col md:flex-row overflow-hidden">
     
     <!-- LEFT SIDEBAR -->
-    <aside class="w-full md:w-[320px] bg-[#c2beae] flex flex-col border-r border-[#a09c8c] shrink-0">
+    <aside class="w-full md:w-[320px] bg-[#c2beae] flex flex-col border-r border-[#a09c8c] shrink-0 overflow-hidden">
       
       <!-- Time & Date -->
-      <div class="p-6 text-center border-b border-dashed border-[#a09c8c]">
-        <div id="clock-main" class="text-6xl font-bold tracking-tight mb-2">
+      <div class="p-4 text-center border-b border-dashed border-[#a09c8c] shrink-0">
+        <div id="clock-main" class="text-6xl font-bold tracking-tight mb-1">
           --:--
         </div>
-        <div class="text-lg tracking-widest text-[#674431]">
+        <div class="text-sm tracking-widest text-[#674431]">
           <span id="clock-ampm">--</span> · <span id="clock-sec">--</span>s
         </div>
       </div>
       
-      <div class="p-4 text-center border-b border-dashed border-[#a09c8c] leading-relaxed tracking-wider">
+      <div class="p-3 text-center border-b border-dashed border-[#a09c8c] text-sm leading-relaxed tracking-wider shrink-0">
         <div id="date-day">--</div>
         <div id="date-full">--</div>
       </div>
 
       <!-- Extended Info Box: Alerts -->
-      <div class="p-6 border-b border-dashed border-[#a09c8c] bg-[#b8b4a4]">
-        <div class="text-xs font-bold mb-3 text-[#674431] tracking-widest uppercase border-b border-[#a09c8c] pb-2">
+      <div class="p-4 border-b border-dashed border-[#a09c8c] bg-[#b8b4a4] shrink-0 flex flex-col max-h-32">
+        <div class="text-xs font-bold mb-2 text-[#674431] tracking-widest uppercase border-b border-[#a09c8c] pb-1 shrink-0">
           Alerts
         </div>
-        <div id="alerts-container" class="text-sm tracking-wider space-y-2 max-h-40 overflow-y-auto pr-2">
+        <div id="alerts-container" class="text-xs tracking-wider space-y-2 overflow-y-auto pr-2 flex-1">
           <div class="opacity-70">FETCHING...</div>
         </div>
       </div>
 
       <!-- Telemetry Stats -->
-      <div class="p-6 flex-1 text-sm tracking-wider space-y-3">
+      <div class="p-6 flex-1 text-sm tracking-wider space-y-4 overflow-hidden flex flex-col justify-center">
         <div class="flex justify-between">
           <span class="opacity-70">STATION</span>
           <span id="tel-station" class="font-bold">--</span>
@@ -113,10 +109,10 @@
     </aside>
 
     <!-- CONTENT AREA -->
-    <main class="flex-1 flex flex-col h-full bg-[#bab7aa]">
+    <main class="flex-1 flex flex-col h-full bg-[#bab7aa] overflow-hidden">
       
       <!-- Tabs Header -->
-      <div class="flex border-b border-[#a09c8c] overflow-x-auto shrink-0 bg-[#c2beae]" id="tabs-header">
+      <div class="flex border-b border-[#a09c8c] overflow-x-auto shrink-0 bg-[#c2beae] no-scrollbar" id="tabs-header">
         <button data-target="CURRENT" class="tab-btn px-6 py-3 text-sm tracking-widest whitespace-nowrap border-r border-[#a09c8c] transition-colors border-b-4 border-b-[#674431] font-bold bg-[#bab7aa]">CURRENT</button>
         <button data-target="7-DAY" class="tab-btn px-6 py-3 text-sm tracking-widest whitespace-nowrap border-r border-[#a09c8c] transition-colors hover:bg-[#b0ad9e] opacity-70 border-b-4 border-b-transparent">7-DAY</button>
         <button data-target="RADAR" class="tab-btn px-6 py-3 text-sm tracking-widest whitespace-nowrap border-r border-[#a09c8c] transition-colors hover:bg-[#b0ad9e] opacity-70 border-b-4 border-b-transparent">RADAR</button>
@@ -125,7 +121,7 @@
       </div>
 
       <!-- Tab Content Container -->
-      <div class="flex-1 overflow-y-auto p-8 relative">
+      <div class="flex-1 p-6 relative overflow-hidden flex flex-col">
         
         <!-- Loading overlay -->
         <div id="loading-overlay" class="absolute inset-0 flex items-center justify-center text-lg tracking-widest opacity-80 animate-pulse bg-[#bab7aa] z-10">
@@ -133,65 +129,71 @@
         </div>
 
         <!-- Content blocks -->
-        <div id="content-container" class="h-full animate-fadeIn hidden">
+        <div id="content-container" class="h-full animate-fadeIn hidden flex-1 flex flex-col min-h-0">
           
-          <!-- CURRENT TAB -->
-          <div id="tab-CURRENT" class="tab-content max-w-4xl mx-auto space-y-6">
-            <div class="bg-[#c2beae] p-8 border border-[#a09c8c] shadow-sm">
-              <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 border-b border-dashed border-[#a09c8c] pb-8 gap-4">
-                <div>
-                  <div class="text-8xl font-bold tracking-tighter text-[#384936]">
+          <!-- CURRENT TAB (Always-On Display Layout) -->
+          <div id="tab-CURRENT" class="tab-content h-full flex flex-col gap-4 min-h-0">
+            
+            <!-- Top Row: Data & Forecast -->
+            <div class="flex flex-col lg:flex-row gap-4 shrink-0 lg:h-44">
+              
+              <!-- Observation Block -->
+              <div class="bg-[#c2beae] p-5 border border-[#a09c8c] flex-1 flex flex-col justify-between shadow-sm">
+                <div class="flex items-start justify-between">
+                  <div class="text-7xl font-bold tracking-tighter text-[#384936]">
                     <span id="current-temp">--</span>°
                   </div>
-                  <div id="current-desc" class="text-2xl tracking-widest uppercase mt-4 text-[#674431]">
-                    Unknown Conditions
+                  <div class="text-right text-xs tracking-widest opacity-80 space-y-1 mt-2">
+                    <p>FEELS: <span id="current-feels">--</span>°</p>
+                    <p>PING: <span id="current-ping">--:--</span></p>
                   </div>
                 </div>
-                <div class="md:text-right text-sm tracking-widest opacity-80 space-y-2">
-                  <p>FEELS LIKE: <span id="current-feels">--</span>°</p>
-                  <p>LAST PING: <span id="current-ping">--:--</span></p>
+                <div id="current-desc" class="text-xl tracking-widest uppercase text-[#674431] mt-2">
+                  Unknown Conditions
                 </div>
               </div>
               
-              <div class="text-lg leading-relaxed tracking-wide">
-                <p class="font-bold mb-2 uppercase border-b border-[#a09c8c] inline-block">Latest Dispatch:</p>
-                <p id="current-dispatch">--</p>
+              <!-- Dispatch Block -->
+              <div class="bg-[#c2beae] p-5 border border-[#a09c8c] flex-[1.5] flex flex-col shadow-sm">
+                <div class="font-bold mb-2 uppercase border-b border-[#a09c8c] inline-block text-sm tracking-widest self-start">Latest Dispatch</div>
+                <div id="current-dispatch" class="text-sm leading-relaxed tracking-wide overflow-hidden" style="display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;">
+                  --
+                </div>
               </div>
             </div>
 
-            <!-- Embedded Radar on Current Screen -->
-            <div class="h-full flex flex-col">
-              <div class="flex justify-between items-center mb-4 text-sm tracking-widest font-bold mt-4">
+            <!-- Bottom Row: Radar (Stretches to fill exact remaining height) -->
+            <div class="flex-1 bg-black border-4 border-[#384936] relative shadow-lg min-h-0">
+              <div class="absolute top-0 left-0 right-0 bg-[#384936] text-[#b49a5b] p-1 px-3 text-xs tracking-widest font-bold flex justify-between z-10 opacity-90 shadow-md">
                 <span>STATION KLWX (STERLING, VA)</span>
                 <span>BASE REFLECTIVITY</span>
               </div>
-              <div class="flex-1 bg-black border-4 border-[#384936] overflow-hidden relative shadow-lg min-h-[400px]">
-                <img 
-                  src="https://radar.weather.gov/ridge/lite/KLWX_loop.gif" 
-                  alt="KLWX Radar Loop" 
-                  class="absolute inset-0 w-full h-full object-contain"
-                />
-              </div>
+              <img 
+                id="current-radar-img"
+                src="" 
+                alt="KLWX Radar Loop" 
+                class="absolute inset-0 w-full h-full object-contain bg-black"
+              />
             </div>
           </div>
 
           <!-- 7-DAY FORECAST TAB -->
-          <div id="tab-7-DAY" class="tab-content hidden max-w-4xl mx-auto space-y-4">
-            <div id="forecast-container">
-              <!-- Forecast items injected here via JS -->
+          <div id="tab-7-DAY" class="tab-content hidden h-full overflow-y-auto max-w-4xl mx-auto space-y-4 w-full pr-2">
+            <div id="forecast-container" class="space-y-4">
+              <!-- Forecast items injected here -->
             </div>
           </div>
 
           <!-- RADAR TAB -->
-          <div id="tab-RADAR" class="tab-content hidden h-full flex flex-col max-w-4xl mx-auto">
-            <div class="flex justify-between items-center mb-4 text-sm tracking-widest font-bold">
+          <div id="tab-RADAR" class="tab-content hidden h-full flex flex-col max-w-4xl mx-auto w-full">
+            <div class="flex justify-between items-center mb-4 text-sm tracking-widest font-bold shrink-0">
               <span>STATION KLWX (STERLING, VA)</span>
               <span>BASE REFLECTIVITY</span>
             </div>
-            <div class="flex-1 bg-black border-4 border-[#384936] overflow-hidden relative shadow-lg min-h-[400px]">
-              <!-- Using the same radar URL here so it stays cached -->
+            <div class="flex-1 bg-black border-4 border-[#384936] overflow-hidden relative shadow-lg min-h-0">
               <img 
-                src="https://radar.weather.gov/ridge/lite/KLWX_loop.gif" 
+                id="tab-radar-img"
+                src="" 
                 alt="KLWX Radar Loop" 
                 class="absolute inset-0 w-full h-full object-contain"
               />
@@ -199,14 +201,15 @@
           </div>
 
           <!-- SPC OUTLOOK TAB -->
-          <div id="tab-SPC-OUTLOOK" class="tab-content hidden h-full flex flex-col max-w-4xl mx-auto">
-            <div class="flex justify-between items-center mb-4 text-sm tracking-widest font-bold">
+          <div id="tab-SPC-OUTLOOK" class="tab-content hidden h-full flex flex-col max-w-4xl mx-auto w-full">
+            <div class="flex justify-between items-center mb-4 text-sm tracking-widest font-bold shrink-0">
               <span>STORM PREDICTION CENTER</span>
               <span>DAY 1 CONVECTIVE OUTLOOK</span>
             </div>
-            <div class="flex-1 bg-white border-4 border-[#384936] overflow-hidden relative shadow-lg min-h-[400px]">
+            <div class="flex-1 bg-white border-4 border-[#384936] overflow-hidden relative shadow-lg min-h-0">
               <img 
-                src="https://www.spc.noaa.gov/products/outlook/day1otlk.gif" 
+                id="spc-outlook-img"
+                src="" 
                 alt="SPC Day 1 Outlook" 
                 class="absolute inset-0 w-full h-full object-contain"
               />
@@ -219,11 +222,11 @@
   </div>
 
   <!-- FOOTER -->
-  <footer class="bg-[#674431] text-[#c2beae] p-2 px-4 flex flex-col md:flex-row justify-between items-center text-xs tracking-widest z-10 shadow-[0_-2px_10px_rgba(0,0,0,0.2)]">
+  <footer class="bg-[#674431] text-[#c2beae] p-2 px-4 flex justify-between items-center text-xs tracking-widest z-10 shadow-[0_-2px_10px_rgba(0,0,0,0.2)] shrink-0">
     <div>
       NWS API · NOAA NEXRAD · SPC · <span id="footer-station">LWX</span>
     </div>
-    <div class="mt-2 md:mt-0">
+    <div>
       Updated <span id="footer-updated">--:--</span>
     </div>
   </footer>
@@ -232,9 +235,8 @@
   <script>
     // Utility functions
     const cToF = (c) => Math.round((c * 9) / 5 + 32);
-    const msToMph = (ms) => Math.round(ms * 2.23694);
-    const paToInHg = (pa) => (pa * 0.0002953).toFixed(2);
     const mToMi = (m) => (m * 0.000621371).toFixed(1);
+    const paToInHg = (pa) => (pa * 0.0002953).toFixed(2);
     const getWindDirection = (degree) => {
       if (degree === null || degree === undefined) return '';
       const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
@@ -242,7 +244,6 @@
       return directions[index % 16];
     };
 
-    // State
     let currentStationId = 'LWX';
 
     // UI Updates
@@ -269,17 +270,12 @@
 
       tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-          // Reset all tabs styles
           tabBtns.forEach(b => {
             b.className = "tab-btn px-6 py-3 text-sm tracking-widest whitespace-nowrap border-r border-[#a09c8c] transition-colors hover:bg-[#b0ad9e] opacity-70 border-b-4 border-b-transparent";
           });
-          // Set active tab style
           btn.className = "tab-btn px-6 py-3 text-sm tracking-widest whitespace-nowrap border-r border-[#a09c8c] transition-colors border-b-4 border-b-[#674431] font-bold bg-[#bab7aa]";
 
-          // Hide all content
           tabContents.forEach(c => c.classList.add('hidden'));
-          
-          // Show active content
           const targetId = `tab-${btn.dataset.target}`;
           document.getElementById(targetId).classList.remove('hidden');
         });
@@ -291,50 +287,63 @@
         const loadingOverlay = document.getElementById('loading-overlay');
         const contentContainer = document.getElementById('content-container');
         
-        loadingOverlay.classList.remove('hidden');
-        contentContainer.classList.add('hidden');
+        // Refresh images dynamically with cache-busting timestamp
+        const cacheBuster = new Date().getTime();
+        const radarUrl = `https://radar.weather.gov/ridge/lite/KLWX_loop.gif?v=${cacheBuster}`;
+        const spcUrl = `https://www.spc.noaa.gov/products/outlook/day1otlk.gif?v=${cacheBuster}`;
+        
+        document.getElementById('current-radar-img').src = radarUrl;
+        document.getElementById('tab-radar-img').src = radarUrl;
+        document.getElementById('spc-outlook-img').src = spcUrl;
 
         // Emmitsburg MD coordinates
         const lat = 39.7037;
         const lon = -77.3269;
 
-        // 1. Get Gridpoint data
+        // 1. Get Gridpoint
         const pointRes = await fetch(`https://api.weather.gov/points/${lat},${lon}`);
         const pointData = await pointRes.json();
-        const forecastUrl = pointData.properties.forecast;
-        const stationsUrl = pointData.properties.observationStations;
-
-        // 2. Get Forecast
-        const forecastRes = await fetch(forecastUrl);
+        
+        // 2. Fetch Forecast & Alerts in parallel
+        const [forecastRes, alertsRes] = await Promise.all([
+          fetch(pointData.properties.forecast),
+          fetch(`https://api.weather.gov/alerts/active?point=${lat},${lon}`)
+        ]);
+        
         const forecastData = await forecastRes.json();
-        const forecastPeriods = forecastData.properties.periods;
-
-        // 3. Get Station and Latest Observation
-        const stationsRes = await fetch(stationsUrl);
-        const stationsData = await stationsRes.json();
-        currentStationId = stationsData.features[0].properties.stationIdentifier;
-
-        const obsRes = await fetch(`https://api.weather.gov/stations/${currentStationId}/observations/latest`);
-        const obsDataRes = await obsRes.json();
-        const obs = obsDataRes.properties;
-
-        // 4. Get Alerts
-        const alertsRes = await fetch(`https://api.weather.gov/alerts/active?point=${lat},${lon}`);
         const alertsData = await alertsRes.json();
+        const forecastPeriods = forecastData.properties.periods;
         const alerts = alertsData.features;
 
-        // --- Render Data to DOM ---
+        // 3. Fallback Station Fetching Loop
+        // Sometimes NWS stations go offline. We will query the nearest 3 stations.
+        const stationsRes = await fetch(pointData.properties.observationStations);
+        const stationsData = await stationsRes.json();
+        const stationList = stationsData.features;
+        
+        let obs = null;
+        for (let i = 0; i < Math.min(stationList.length, 3); i++) {
+          currentStationId = stationList[i].properties.stationIdentifier;
+          try {
+            const obsRes = await fetch(`https://api.weather.gov/stations/${currentStationId}/observations/latest`);
+            if (obsRes.ok) {
+              const obsDataRes = await obsRes.json();
+              obs = obsDataRes.properties;
+              break; // Success! Break out of the loop.
+            }
+          } catch (e) {
+            console.warn(`Station ${currentStationId} observation fetch failed, trying next...`);
+          }
+        }
 
-        // Telemetry
-        document.getElementById('tel-station').textContent = currentStationId;
-        document.getElementById('footer-station').textContent = currentStationId;
+        // --- Render Data to DOM ---
+        document.getElementById('tel-station').textContent = currentStationId || 'NO DATA';
+        document.getElementById('footer-station').textContent = currentStationId || 'NO DATA';
         
         document.getElementById('tel-humidity').textContent = obs?.relativeHumidity?.value ? Math.round(obs.relativeHumidity.value) + '%' : '--';
-        
         document.getElementById('tel-wind').textContent = obs?.windSpeed?.value !== null && obs?.windSpeed?.value !== undefined 
           ? `${getWindDirection(obs.windDirection.value)} ${Math.round(obs.windSpeed.value * 0.621371)}` 
           : '--';
-        
         document.getElementById('tel-pressure').textContent = obs?.barometricPressure?.value ? paToInHg(obs.barometricPressure.value) : '--';
         document.getElementById('tel-visibility').textContent = obs?.visibility?.value ? mToMi(obs.visibility.value) : '--';
         document.getElementById('tel-dewpoint').textContent = obs?.dewpoint?.value !== null && obs?.dewpoint?.value !== undefined 
@@ -343,11 +352,7 @@
         let ceiling = '--';
         if (obs?.cloudLayers && obs.cloudLayers.length > 0) {
           const lowestCloud = obs.cloudLayers[0];
-          if (lowestCloud.base?.value) {
-            ceiling = Math.round(lowestCloud.base.value * 3.28084) + 'ft';
-          } else {
-            ceiling = lowestCloud.amount || '--';
-          }
+          ceiling = lowestCloud.base?.value ? Math.round(lowestCloud.base.value * 3.28084) + 'ft' : lowestCloud.amount || '--';
         } else if (obs && !obs.cloudLayers) {
           ceiling = 'CLR';
         }
@@ -359,7 +364,7 @@
           let alertsHtml = '';
           alerts.forEach(alert => {
             alertsHtml += `
-              <div class="font-bold text-[#8a3324] leading-tight flex items-start gap-2">
+              <div class="font-bold text-[#8a3324] leading-tight flex items-start gap-1">
                 <span class="shrink-0">⚠</span>
                 <span>${alert.properties.event}</span>
               </div>
@@ -370,7 +375,7 @@
           alertsContainer.innerHTML = '<div class="opacity-70">NO ACTIVE ALERTS</div>';
         }
 
-        // Current Tab Info
+        // Current Tab Observation Info
         document.getElementById('current-temp').textContent = obs?.temperature?.value !== null ? cToF(obs.temperature.value) : '--';
         document.getElementById('current-desc').textContent = obs?.textDescription || 'Unknown Conditions';
         
@@ -383,19 +388,19 @@
         document.getElementById('current-feels').textContent = feelsLike;
         
         const timestamp = obs?.timestamp ? new Date(obs.timestamp) : new Date();
-        document.getElementById('current-ping').textContent = timestamp.toLocaleTimeString();
+        document.getElementById('current-ping').textContent = timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
 
         if (forecastPeriods && forecastPeriods.length > 0) {
           document.getElementById('current-dispatch').textContent = forecastPeriods[0].detailedForecast;
         }
 
-        // 7-Day Forecast Tab Generation
+        // 7-Day Forecast Tab
         const forecastContainer = document.getElementById('forecast-container');
-        let forecastHtml = '';
         if (forecastPeriods) {
+          let forecastHtml = '';
           forecastPeriods.forEach(period => {
             forecastHtml += `
-              <div class="bg-[#c2beae] border border-[#a09c8c] p-4 flex flex-col md:flex-row md:items-center gap-4 shadow-sm">
+              <div class="bg-[#c2beae] border border-[#a09c8c] p-4 flex flex-col md:flex-row md:items-center gap-4 shadow-sm shrink-0">
                 <div class="w-48 shrink-0">
                   <div class="font-bold tracking-widest uppercase">${period.name}</div>
                   <div class="text-[#674431] font-bold text-xl">
@@ -411,12 +416,11 @@
           forecastContainer.innerHTML = forecastHtml;
         }
 
-        // Update footer time
+        // Footer time
         const now = new Date();
         const updateTimeStr = `${now.getHours() % 12 || 12}:${now.getMinutes().toString().padStart(2, '0')} ${now.getHours() >= 12 ? 'PM' : 'AM'}`;
         document.getElementById('footer-updated').textContent = updateTimeStr;
 
-        // Show UI after a tiny delay for visual effect
         setTimeout(() => {
           loadingOverlay.classList.add('hidden');
           contentContainer.classList.remove('hidden');
@@ -424,21 +428,20 @@
 
       } catch (error) {
         console.error("Weather fetch failed:", error);
-        document.getElementById('loading-overlay').textContent = "ERROR CONTACTING STATION.";
+        document.getElementById('loading-overlay').innerHTML = "ERROR CONTACTING STATION.<br><span class='text-sm mt-2 opacity-70'>Retrying shortly...</span>";
       }
     }
 
-    // Initialize application
+    // Init
     document.addEventListener('DOMContentLoaded', () => {
       setupTabs();
       updateClock();
       setInterval(updateClock, 1000);
       
       fetchWeather();
-      // Fetch every 15 mins
-      setInterval(fetchWeather, 15 * 60 * 1000);
+      // Fetch every 10 mins for always-on display freshness
+      setInterval(fetchWeather, 10 * 60 * 1000);
     });
-
   </script>
 </body>
 </html>
